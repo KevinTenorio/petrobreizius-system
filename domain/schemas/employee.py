@@ -1,6 +1,7 @@
 from pydantic import Field, UUID4, EmailStr
 from domain.schemas.generic import GenericModel
 from datetime import datetime
+from domain.schemas.event import Event
 
 class EmployeeBase(GenericModel):
     name: str = Field(example="João Petrobreizius", title="Employee name")
@@ -14,5 +15,6 @@ class EmployeeCreate(EmployeeBase):
 
 class Employee(EmployeeBase):
     id: UUID4 = Field(example="123e4567-e89b-12d3-a456-426614174000", title="Employee UUID")
+    events: list[Event] = Field(example=[], title="List of events UUIDs")
     class Config:
         from_attributes = True
