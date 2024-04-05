@@ -35,3 +35,7 @@ def delete_event(id: UUID, db: Session = Depends(get_session)):
 @router.post("/events/{event_id}/invite/{employee_id}", tags=TAGS, summary='Invite an employee to an event')
 def invite_to_event(event_id: UUID, employee_id: UUID, db: Session = Depends(get_session)):
     return event_service.invite_to_event(db, event_id, employee_id)
+
+@router.post("/events/find_time", tags=TAGS, summary='Find a time for an event')
+def find_time_for_event(employees_ids: list[UUID], db: Session = Depends(get_session)):
+    return event_service.find_time_for_event(db, employees_ids)

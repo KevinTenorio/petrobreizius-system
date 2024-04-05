@@ -8,6 +8,7 @@ from uuid import UUID
 from commons.check_meeting_collision import check_meeting_collision
 from datetime import datetime
 from domain.models.employee_event import EmployeeEvent
+from commons.merge_overlapping_events import merge_overlapping_events
 
 def get_events(db: Session):
     return db.query(Event).all()
@@ -75,3 +76,13 @@ def invite_to_event(db: Session, event_id: UUID, employee_id: UUID):
     db.add(db_employee_event)
     db.commit()
     return db_employee_event
+
+def find_time_for_event(db: Session, employees_ids: list[UUID]):
+    employees_events = db.query(EmployeeEvent).filter(EmployeeEvent.employeeid.in_(employees_ids)).all()
+    employees_events_ids = [employee_event.eventid for employee_event in employees_events]
+    employees_events = db.query(Event).filter(Event.id.in_(employees_events_ids)).all()
+    employees_times = []
+    for employee_event in employees_events:
+        employees_times.append((datetime.strptime(employee_event.start, "%Y-%m-%d %H:%M:%S"), datetime.strptime(employee_event.finish, "%Y-%m-%d %H:%M:%S")))
+    merged_times = merge_overlapping_events(employees_times)
+    return merged_times

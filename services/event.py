@@ -20,3 +20,6 @@ def delete_event(db: Session, event_id):
 
 def invite_to_event(db: Session, event_id, employee_id):
     return event_repository.invite_to_event(db, event_id, employee_id)
+
+def find_time_for_event(db: Session, employees_ids):
+    return event_repository.find_time_for_event(db, employees_ids)
