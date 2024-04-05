@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, UUID
 from uuid import uuid4
-from sqlalchemy.orm import relationship
 from domain.models.generic import GenericBase
 
 class Room(GenericBase):

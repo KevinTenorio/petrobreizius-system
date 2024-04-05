@@ -59,20 +59,19 @@ def delete_event(db: Session, event_id: UUID):
     db.commit()
     return db_event
 
-def invite_to_event(db: Session, employee_id: UUID, event_id: UUID):
+def invite_to_event(db: Session, event_id: UUID, employee_id: UUID):
     db_event = get_event(db, event_id)
-    if db_event is None:
-        raise HTTPException(status_code=404, detail=f'Event of id={event_id} not found')
     db_employee = db.query(Employee).filter(Employee.id == employee_id).first()
     if db_employee is None:
         raise HTTPException(status_code=404, detail=f'Employee of id={employee_id} not found')
-    employee_events = db.query(EmployeeEvent).filter(EmployeeEvent.employeeid == employee_id).all()
+    employee_events_ids = db.query(EmployeeEvent).filter(EmployeeEvent.employeeid == employee_id).all()
+    employee_events = db.query(Event).filter(Event.id.in_([employee_event.eventid for employee_event in employee_events_ids])).all()
     employee_times = []
     for employee_event in employee_events:
         employee_times.append((datetime.strptime(employee_event.start, "%Y-%m-%d %H:%M:%S"), datetime.strptime(employee_event.finish, "%Y-%m-%d %H:%M:%S")))
-    if check_meeting_collision(db_event.start, db_event.finish, employee_times):
+    if check_meeting_collision(datetime.strptime(db_event.start, "%Y-%m-%d %H:%M:%S"), datetime.strptime(db_event.finish, "%Y-%m-%d %H:%M:%S"), employee_times):
         raise HTTPException(status_code=400, detail='Employee cannot attend to this event because of time collision.')
-    db_employee_event = EmployeeEvent(employee_id=employee_id, event_id=event_id)
+    db_employee_event = EmployeeEvent(employeeid=employee_id, eventid=event_id)
     db.add(db_employee_event)
     db.commit()
     return db_employee_event
