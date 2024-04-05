@@ -1,8 +1,11 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from domain.models.room import Room
+from domain.models.event import Event
 from domain.schemas.room import RoomCreate
 from uuid import UUID
+from datetime import datetime
+from commons.check_meeting_collision import check_meeting_collision
 
 
 def get_rooms(db: Session):
@@ -36,3 +39,16 @@ def delete_room(db: Session, room_id: UUID):
     db.delete(db_room)
     db.commit()
     return db_room
+
+def find_free_rooms(db: Session, start: datetime, finish: datetime):
+    db_rooms = get_rooms(db)
+    free_rooms = []
+    for db_room in db_rooms:
+        room_events = db.query(Event).filter(Event.roomid == db_room.id).all()
+        room_times = []
+        for room_event in room_events:
+            room_times.append((datetime.strptime(room_event.start, "%Y-%m-%d %H:%M:%S"), datetime.strptime(room_event.finish, "%Y-%m-%d %H:%M:%S")))
+        if not check_meeting_collision(datetime.strptime(start, "%Y-%m-%dT%H:%M:%S"), datetime.strptime(finish, "%Y-%m-%dT%H:%M:%S"), room_times):
+            free_rooms.append(db_room)
+    return free_rooms
+

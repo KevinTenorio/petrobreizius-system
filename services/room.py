@@ -17,3 +17,6 @@ def put_room(db: Session, room_id, room):
 
 def delete_room(db: Session, room_id):
     return room_repository.delete_room(db, room_id)
+
+def find_free_rooms(db: Session, start, finish):
+    return room_repository.find_free_rooms(db, start, finish)

@@ -31,3 +31,7 @@ def update_room(id: UUID, room: RoomCreate, db: Session = Depends(get_session)):
 @router.delete("/rooms/{id}", tags=TAGS, summary='Delete a room', response_model=Room)
 def delete_room(id: UUID, db: Session = Depends(get_session)):
     return room_service.delete_room(db, id)
+
+@router.post("/rooms/find_free", tags=TAGS, summary='Find free rooms', response_model=list[Room])
+def find_free_rooms(start: str, finish: str, db: Session = Depends(get_session)):
+    return room_service.find_free_rooms(db, start, finish)
